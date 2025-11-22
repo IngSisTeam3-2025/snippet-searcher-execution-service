@@ -18,11 +18,18 @@ jobs:
           token: ${{ secrets.GHCR_TOKEN }}
           image: ghcr.io/ingsisteam3-2025/snippet-searcher-execution-service:latest
 
-      - name: Trigger infra deploy
+      - name: Trigger Infra Deployment
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
         run: |
+          branch=${GITHUB_REF_NAME}
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GHCR_TOKEN }}" \
             https://api.github.com/repos/IngSisTeam3-2025/snippet-searcher-infra-service/dispatches \
-            -d '{"event_type":"deploy_from_service"}'
+            -d "{
+              \"event_type\": \"deploy_from_service\",
+              \"client_payload\": {
+                \"branch\": \"$branch\",
+                \"service\": \"execution-service\"
+              }
+            }"
