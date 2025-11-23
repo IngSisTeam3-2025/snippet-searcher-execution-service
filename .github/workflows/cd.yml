@@ -11,12 +11,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Determine tag
+        id: vars
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            echo "tag=latest" >> $GITHUB_ENV
+          else
+            echo "tag=dev" >> $GITHUB_ENV
+          fi
+
       - name: Build and Push to GHCR
         uses: ingsisteam3-2025/snippet-searcher-actions-service/.github/actions/build-and-push@main
         with:
           username: ${{ secrets.GHCR_USERNAME }}
           token: ${{ secrets.GHCR_TOKEN }}
-          image: ghcr.io/ingsisteam3-2025/snippet-searcher-execution-service:latest
+          image: ghcr.io/ingsisteam3-2025/${{ github.event.repository.name }}:${{ env.tag }}
 
       - name: Trigger Infra Deployment
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
