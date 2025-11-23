@@ -26,7 +26,7 @@ jobs:
           username: ${{ secrets.GHCR_USERNAME }}
           token: ${{ secrets.GHCR_TOKEN }}
           image: ghcr.io/ingsisteam3-2025/${{ github.event.repository.name }}:${{ env.tag }}
-          gpr_user: ${{ secrets.GPR_USER }}it
+          gpr_user: ${{ secrets.GPR_USER }}
           gpr_key: ${{ secrets.GPR_KEY }}
 
       - name: Trigger Infra Deployment
