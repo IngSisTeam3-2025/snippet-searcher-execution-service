@@ -23,7 +23,7 @@ repositories {
 		url = uri("https://maven.pkg.github.com/IngSisTeam3-2025/printscript")
 		authentication {
 			create<org.gradle.authentication.http.HttpHeaderAuthentication>("header")
-		}g
+		}
 		credentials(org.gradle.api.credentials.HttpHeaderCredentials::class) {
 			name = "Authorization"
 			value = "Bearer ${File("/token.txt").readText().trim()}"
