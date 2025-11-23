@@ -21,12 +21,17 @@ repositories {
 	maven {
 		name = "GitHubPackages"
 		url = uri("https://maven.pkg.github.com/IngSisTeam3-2025/printscript")
+
 		authentication {
-			create<org.gradle.authentication.http.HttpHeaderAuthentication>("header")
+			create<HttpHeaderAuthentication>("header")
 		}
-		credentials(org.gradle.api.credentials.HttpHeaderCredentials::class) {
+
+		val tokenFile = File("/token.txt")
+		val githubTokenFromFile = if (tokenFile.exists()) tokenFile.readText().trim() else null
+
+		credentials(HttpHeaderCredentials::class) {
 			name = "Authorization"
-			value = "Bearer ${File("/token.txt").readText().trim()}"
+			value = "Bearer ${githubTokenFromFile ?: System.getenv("GITHUB_TOKEN") ?: ""}"
 		}
 	}
 }
