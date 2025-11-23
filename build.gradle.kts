@@ -21,17 +21,9 @@ repositories {
 	maven {
 		name = "GitHubPackages"
 		url = uri("https://maven.pkg.github.com/IngSisTeam3-2025/printscript")
-
-		authentication {
-			create<HttpHeaderAuthentication>("header")
-		}
-
-		val tokenFile = File("/token.txt")
-		val githubTokenFromFile = if (tokenFile.exists()) tokenFile.readText().trim() else null
-
-		credentials(HttpHeaderCredentials::class) {
-			name = "Authorization"
-			value = "Bearer ${githubTokenFromFile ?: System.getenv("GITHUB_TOKEN") ?: ""}"
+		credentials {
+			username = (project.findProperty("gpr.user") ?: System.getenv("USERNAME"))?.toString()
+			password = (project.findProperty("gpr.key") ?: System.getenv("TOKEN"))?.toString()
 		}
 	}
 }
