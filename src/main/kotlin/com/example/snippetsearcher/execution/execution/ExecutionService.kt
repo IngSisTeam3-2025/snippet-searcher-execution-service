@@ -17,6 +17,7 @@ import java.util.*
 class ExecutionService(
     private val client: SnippetClient
 ) {
+
     private val lexer = PrintScriptLexer()
     private val parser = PrintScriptParser()
     private val validator = PrintScriptValidator()
@@ -30,10 +31,11 @@ class ExecutionService(
         val input = StringReader("")
         val output = StringOutputWriter()
         val env = mutableMapOf<String, Any>()
-        val reporter = { msg: String -> println(msg) }
+        val reporter: (String) -> Unit = { }
 
         runner.run(
             snippet.version,
+            source,
             input,
             output,
             env,
@@ -53,10 +55,11 @@ class ExecutionService(
         val input = StringReader("")
         val output = StringOutputWriter()
         val env = mutableMapOf<String, Any>()
-        val reporter = { msg: String -> println(msg) }
+        val reporter: (String) -> Unit = { }
 
         runner.run(
             snippet.version,
+            source,
             input,
             output,
             env,
