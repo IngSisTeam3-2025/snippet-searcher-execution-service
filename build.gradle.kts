@@ -22,8 +22,8 @@ repositories {
 		name = "GitHubPackages"
 		url = uri("https://maven.pkg.github.com/IngSisTeam3-2025/printscript")
 		credentials {
-			username = (project.findProperty("gpr.user") ?: System.getenv("USERNAME"))?.toString()
-			password = (project.findProperty("gpr.key") ?: System.getenv("TOKEN"))?.toString()
+			username = System.getenv("GITHUB_ACTOR") ?: ""
+			password = System.getenv("GITHUB_TOKEN") ?: ""
 		}
 	}
 }

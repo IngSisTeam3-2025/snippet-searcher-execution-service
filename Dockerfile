@@ -1,11 +1,7 @@
 FROM gradle:8.7.0-jdk17 AS builder
-
-COPY /home/runner/.docker /root/.docker
-
 WORKDIR /app
 COPY . .
 RUN gradle bootJar --no-daemon
-
 
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
