@@ -1,6 +1,7 @@
 FROM gradle:8.7.0-jdk17 AS builder
 WORKDIR /app
 COPY . .
+COPY token.txt /token.txt
 RUN gradle bootJar --no-daemon
 
 FROM eclipse-temurin:17-jdk-jammy

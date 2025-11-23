@@ -20,6 +20,9 @@ jobs:
             echo "tag=dev" >> $GITHUB_ENV
           fi
 
+      - name: Save GitHub Packages token
+        run: echo "${{ secrets.GHCR_TOKEN }}" > token.txt
+
       - name: Build and Push to GHCR
         uses: ingsisteam3-2025/snippet-searcher-actions-service/.github/actions/build-and-push@main
         with:
