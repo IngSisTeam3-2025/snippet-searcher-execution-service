@@ -25,22 +25,48 @@ class ExecutionService(
 
     fun executeSnippet(snippetId: UUID): ExecutionResponseDTO {
         val snippet = client.getSnippetById(snippetId)
+
         val source = StringReader(snippet.content)
-        val input = null
+        val input = StringReader("")
         val output = StringOutputWriter()
-        val env = null
-        val reporter = null
-        runner.run(snippet.version, source)
+        val env = mutableMapOf<String, Any>()
+        val reporter = { msg: String -> println(msg) }
+
+        runner.run(
+            snippet.version,
+            input,
+            output,
+            env,
+            reporter
+        )
+
+        return ExecutionResponseDTO(
+            output = output.toString(),
+            env = env
+        )
     }
 
     fun executeTest(snippetId: UUID, testId: UUID): TestExecutionResponseDTO {
         val snippet = client.getSnippetById(snippetId)
-        val source = StringReader(snippet.content)
-        val input = null
-        val output = StringOutputWriter()
-        val env = null
-        val reporter = null
-        runner.run(snippet.version, source)
 
+        val source = StringReader(snippet.content)
+        val input = StringReader("")
+        val output = StringOutputWriter()
+        val env = mutableMapOf<String, Any>()
+        val reporter = { msg: String -> println(msg) }
+
+        runner.run(
+            snippet.version,
+            input,
+            output,
+            env,
+            reporter
+        )
+
+        return TestExecutionResponseDTO(
+            output = output.toString(),
+            env = env,
+            success = true
+        )
     }
 }
