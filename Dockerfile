@@ -1,16 +1,16 @@
 FROM gradle:8.7.0-jdk17 AS builder
-
 WORKDIR /app
 
 ARG GPR_USER
 ARG GPR_KEY
 
-ENV GPR_USER=${GPR_USER}
-ENV GPR_KEY=${GPR_KEY}
+ENV GPR_USER=$GPR_USER
+ENV GPR_KEY=$GPR_KEY
 
 COPY . .
 
-RUN gradle bootJar --no-daemon
+RUN gradle bootJar --no-daemon --stacktrace --info
+
 
 
 FROM eclipse-temurin:17-jdk-jammy
