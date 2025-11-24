@@ -12,6 +12,8 @@ RUN mkdir -p /root/.gradle && \
 
 COPY . .
 
+RUN echo "GPR_USER=$GPR_USER" && echo "GPR_KEY=$GPR_KEY"
+
 RUN gradle bootJar --no-daemon
 
 
