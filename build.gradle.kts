@@ -1,8 +1,11 @@
 plugins {
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
+	kotlin("jvm") version "1.9.23"
+	kotlin("plugin.spring") version "1.9.23"
 	id("org.springframework.boot") version "3.5.7"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("org.jetbrains.kotlinx.kover") version "0.6.1"
+	id("io.gitlab.arturbosch.detekt") version "1.23.6"
+	id("com.diffplug.spotless") version "6.25.0"
 }
 
 group = "com.example.snippetsearcher"
@@ -46,14 +49,85 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-kotlin {
-	compilerOptions {
-		freeCompilerArgs.addAll("-Xjsr305=strict")
-	}
+	detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6")
 }
 
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+detekt {
+	buildUponDefaultConfig = true
+	config.setFrom(files("$rootDir/detekt/detekt.yml"))
+	allRules = false
+	autoCorrect = false
+}
+
+
+spotless {
+	kotlin {
+		target("**/*.kt")
+		targetExclude("build/**/*.kt")
+		ktlint().editorConfigOverride(
+			mapOf(
+				"indent_size" to "4",
+				"insert_final_newline" to "true"
+			)
+		)
+		trimTrailingWhitespace()
+	}
+}
+
+kover {
+	htmlReport {
+		onCheck.set(true)
+	}
+	verify {
+		rule {
+			bound {
+				minValue = 0
+			}
+		}
+	}
+}
+
+tasks.test {
+	useJUnitPlatform()
+}
+
+tasks.spotlessCheck {
+	mustRunAfter(tasks.clean)
+}
+
+tasks.detekt {
+	mustRunAfter(tasks.spotlessCheck)
+}
+
+tasks.test {
+	mustRunAfter(tasks.detekt)
+}
+
+tasks.named("koverVerify") {
+	mustRunAfter(tasks.test)
+}
+
+tasks.check {
+	dependsOn(tasks.spotlessCheck)
+	dependsOn(tasks.detekt)
+	dependsOn(tasks.test)
+	dependsOn(tasks.named("koverVerify"))
+}
+
+tasks.named("build") {
+	dependsOn(tasks.check)
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+	jvmTarget = "1.8"
+	classpath = files()
+	include("**/*.kt")
+	exclude("**/*.class")
+	setSource(files("src/main/kotlin", "src/test/kotlin"))
+}
+
+

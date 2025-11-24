@@ -8,5 +8,8 @@ data class SnippetResponseDTO(
     val description: String,
     val language: String,
     val version: String,
-    val content: String
+    val content: String,
+    val ownerId: String,
+
+    val inputs: Collection<String> = emptyList(),
 )

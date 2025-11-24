@@ -1,0 +1,22 @@
+style:
+  SpacingBetweenPackageAndImports:
+    active: true
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+  LoopWithTooManyJumpStatements:
+    active: true
+  ReturnCount:
+    active: true
+  UseCheckOrError:
+    active: true
+complexity:
+  TooManyFunctions:
+    active: true
+  CyclomaticComplexMethod:
+    active: true
+  LongMethod:
+    active: true
+exceptions:
+  TooGenericExceptionThrown:
+    active: true

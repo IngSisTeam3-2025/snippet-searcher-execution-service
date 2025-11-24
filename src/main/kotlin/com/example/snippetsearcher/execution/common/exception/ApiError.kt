@@ -7,5 +7,5 @@ data class ApiError(
     val error: String,
     val message: String?,
     val path: String?,
-    val timestamp: Instant = Instant.now()
+    val timestamp: Instant = Instant.now(),
 )
