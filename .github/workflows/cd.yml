@@ -15,7 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact commit from CI
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          clean: true
 
       - name: Set tag
         run: |
@@ -24,6 +28,12 @@ jobs:
           else
             echo "tag=dev" >> $GITHUB_ENV
           fi
+
+      - name: Print SHAs
+        run: |
+          echo "head_sha: ${{ github.event.workflow_run.head_sha }}"
+          echo "repo HEAD: $(git rev-parse HEAD)"
+
 
       - name: Build and Push to GHCR
         uses: ingsisteam3-2025/snippet-searcher-actions-service/.github/actions/build-and-push@main
