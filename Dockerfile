@@ -1,5 +1,4 @@
 FROM gradle:8.7.0-jdk17 AS builder
-
 WORKDIR /app
 
 ARG GPR_USER
@@ -13,8 +12,7 @@ COPY . .
 
 RUN chmod +x gradlew
 
-# LA LÍNEA CLAVE
-RUN ./gradlew build bootJar --no-daemon
+RUN ./gradlew bootJar --no-daemon
 
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
