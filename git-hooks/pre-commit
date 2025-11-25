@@ -1,38 +1,16 @@
 #!/bin/sh
-echo ""
-echo " Ejecutando pre-commit checks..."
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "Running pre-commit checks..."
 
-# Detekt (linter)
-echo "  1️) Ejecutando Detekt (linter)..."
-./gradlew detekt --console=plain -q
-DETEKT_EXIT=$?
+./gradlew spotlessApply
+SPOTLESS_RESULT=$?
 
-if [ $DETEKT_EXIT -ne 0 ]; then
-    echo ""
-    echo "❌ Detekt encontró problemas de código."
-    echo "   Revisá los errores arriba y corregí antes de commitear."
-    echo ""
+./gradlew detekt
+DETEKT_RESULT=$?
+
+if [ $SPOTLESS_RESULT -ne 0 ] || [ $DETEKT_RESULT -ne 0 ]; then
+    echo "Pre-commit checks failed. Commit aborted."
     exit 1
 fi
-echo "     ✅ Detekt pasó"
 
-# Spotless (formatter check)
-echo "  2️) Ejecutando Spotless Check (formatter)..."
-./gradlew spotlessCheck --console=plain -q
-SPOTLESS_EXIT=$?
-
-if [ $SPOTLESS_EXIT -ne 0 ]; then
-    echo ""
-    echo "❌ Código sin formatear correctamente."
-    echo "   Ejecutá: ./gradlew spotlessApply"
-    echo "   Y volvé a intentar el commit."
-    echo ""
-    exit 1
-fi
-echo "     ✅ Spotless pasó"
-
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "✅ Pre-commit checks completados exitosamente!"
-echo ""
+echo "Pre-commit checks passed. Proceeding with commit."
+exit 0
