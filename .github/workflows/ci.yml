@@ -29,3 +29,13 @@ jobs:
 
       - name: Build and run checks
         run: ./gradlew clean build --stacktrace
+
+      # === NUEVO ===
+      - name: Save commit SHA
+        run: echo "${GITHUB_SHA}" > commit.txt
+
+      - name: Upload commit SHA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-commit
+          path: commit.txt
