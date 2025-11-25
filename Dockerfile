@@ -5,7 +5,6 @@ WORKDIR /app
 ARG GPR_USER
 ARG GPR_KEY
 
-# configurar gradle dentro del contenedor
 RUN mkdir -p /root/.gradle && \
     echo "gpr.user=${GPR_USER}" >> /root/.gradle/gradle.properties && \
     echo "gpr.key=${GPR_KEY}" >> /root/.gradle/gradle.properties
@@ -13,7 +12,6 @@ RUN mkdir -p /root/.gradle && \
 COPY . .
 
 RUN ./gradlew bootJar --no-daemon
-
 
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
