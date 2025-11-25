@@ -1,75 +1,72 @@
 package com.example.snippetsearcher.execution.execution
 
+import com.example.snippetsearcher.execution.env.EnvClient
 import com.example.snippetsearcher.execution.execution.dto.ExecutionResponseDTO
 import com.example.snippetsearcher.execution.execution.dto.TestExecutionResponseDTO
-import com.example.snippetsearcher.execution.execution.util.StringOutputWriter
-import com.example.snippetsearcher.execution.execution.util.StringReader
+import com.example.snippetsearcher.execution.execution.runner.LanguageRunner
 import com.example.snippetsearcher.execution.snippet.SnippetClient
-import interpreter.InterpreterRunner
-import interpreter.PrintScriptInterpreter
-import lexer.PrintScriptLexer
 import org.springframework.stereotype.Service
-import parser.PrintScriptParser
-import validator.PrintScriptValidator
-import java.util.*
+import java.util.UUID
 
 @Service
 class ExecutionService(
-    private val client: SnippetClient
+    private val snippetClient: SnippetClient,
+    private val envClient: EnvClient,
+    private val runners: List<LanguageRunner>,
 ) {
 
-    private val lexer = PrintScriptLexer()
-    private val parser = PrintScriptParser()
-    private val validator = PrintScriptValidator()
-    private val interpreter = PrintScriptInterpreter()
-    private val runner = InterpreterRunner(lexer, parser, validator, interpreter)
+    private fun resolveRunner(language: String): LanguageRunner =
+        runners.find { it.supports(language) }
+            ?: throw IllegalArgumentException("No runner available for language: $language")
 
     fun executeSnippet(snippetId: UUID): ExecutionResponseDTO {
-        val snippet = client.getSnippetById(snippetId)
+        val snippet = snippetClient.getSnippetById(snippetId)
 
-        val source = StringReader(snippet.content)
-        val input = StringReader("")
-        val output = StringOutputWriter()
-        val env = mutableMapOf<String, Any>()
-        val reporter: (String) -> Unit = { }
+        val runner = resolveRunner(snippet.language)
 
-        runner.run(
-            snippet.version,
-            source,
-            input,
-            output,
-            env,
-            reporter
+        val inputs = snippet.inputs
+        val envs = envClient.getEnvsByOwner(UUID.fromString(snippet.ownerId))
+            .associate { it.key to it.value }
+
+        val result = runner.run(
+            code = snippet.content,
+            version = snippet.version,
+            inputs = inputs,
+            envs = envs,
         )
 
         return ExecutionResponseDTO(
-            output = output.toString(),
-            env = env
+            status = if (result.success) "ok" else "error",
+            output = if (result.success) result.output else result.diagnostics.joinToString("\n"),
+            runtimeMs = result.runtimeMs,
         )
     }
 
     fun executeTest(snippetId: UUID, testId: UUID): TestExecutionResponseDTO {
-        val snippet = client.getSnippetById(snippetId)
+        val snippet = snippetClient.getSnippetById(snippetId)
+        val test = snippetClient.getTestSnippetById(snippetId, testId)
 
-        val source = StringReader(snippet.content)
-        val input = StringReader("")
-        val output = StringOutputWriter()
-        val env = mutableMapOf<String, Any>()
-        val reporter: (String) -> Unit = { }
+        val runner = resolveRunner(snippet.language)
 
-        runner.run(
-            snippet.version,
-            source,
-            input,
-            output,
-            env,
-            reporter
+        val envs = envClient.getEnvsByOwner(UUID.fromString(snippet.ownerId))
+            .associate { it.key to it.value }
+
+        val result = runner.run(
+            code = snippet.content,
+            version = snippet.version,
+            inputs = test.inputs,
+            envs = envs,
         )
 
+        if (!result.success) {
+            return TestExecutionResponseDTO("failed", result.runtimeMs)
+        }
+
+        val actualOutput = result.output.split("\n").filter { it.isNotBlank() }
+
         return TestExecutionResponseDTO(
-            output = output.toString(),
-            env = env,
-            success = true
+            status = if (actualOutput == test.outputs.toList()) "passed" else "failed",
+            runtimeMs = result.runtimeMs,
         )
     }
 }

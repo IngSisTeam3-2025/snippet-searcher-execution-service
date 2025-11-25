@@ -1,7 +1,10 @@
 services:
   snippet-execution-service:
-    build: .
-    container_name: snippet_execution_service
+    build:
+      context: .
+      args:
+        GPR_USER: ${GPR_USER}
+        GPR_KEY: ${GPR_KEY}
     environment:
       SPRING_PROFILES_ACTIVE: prod
 
@@ -11,7 +14,6 @@ services:
       - "8085:8080"
     networks:
       - snippetnet
-
 networks:
   snippetnet:
     name: snippetnet

@@ -1,7 +1,5 @@
-package com.example.snippetsearcher.snippet.common.exception
+package com.example.snippetsearcher.execution.common.exception
 
-import com.example.snippetsearcher.execution.common.exception.ApiError
-import com.example.snippetsearcher.execution.common.exception.ApiException
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -20,8 +18,8 @@ class GlobalExceptionHandler {
                     status = e.status.value(),
                     error = e.status.reasonPhrase,
                     message = e.message,
-                    path = request.requestURI
-                )
+                    path = request.requestURI,
+                ),
             )
     }
 
@@ -34,8 +32,8 @@ class GlobalExceptionHandler {
                     status = 500,
                     error = "Internal Server Error",
                     message = e.message,
-                    path = request.requestURI
-                )
+                    path = request.requestURI,
+                ),
             )
     }
 }

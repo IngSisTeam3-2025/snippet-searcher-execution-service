@@ -7,20 +7,33 @@ on:
 
 jobs:
   build-and-push:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      contains(fromJson('["main","dev"]'), github.event.workflow_run.head_branch)
+
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact commit from CI
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          clean: true
 
-      - name: Determine tag
-        id: vars
+      - name: Set tag
         run: |
-          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+          if [ "${{ github.event.workflow_run.head_branch }}" = "main" ]; then
             echo "tag=latest" >> $GITHUB_ENV
           else
             echo "tag=dev" >> $GITHUB_ENV
           fi
+
+      - name: Print SHAs
+        run: |
+          echo "head_sha: ${{ github.event.workflow_run.head_sha }}"
+          echo "repo HEAD: $(git rev-parse HEAD)"
+
 
       - name: Build and Push to GHCR
         uses: ingsisteam3-2025/snippet-searcher-actions-service/.github/actions/build-and-push@main
@@ -28,13 +41,11 @@ jobs:
           username: ${{ secrets.GHCR_USERNAME }}
           token: ${{ secrets.GHCR_TOKEN }}
           image: ghcr.io/ingsisteam3-2025/${{ github.event.repository.name }}:${{ env.tag }}
-          gpr_user: ${{ secrets.GPR_USER }}
-          gpr_key: ${{ secrets.GPR_KEY }}
+          gpr_user: ${{ github.actor }}
+          gpr_key: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger Infra Deployment
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev'
         run: |
-          branch=${GITHUB_REF_NAME}
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GHCR_TOKEN }}" \
@@ -42,7 +53,7 @@ jobs:
             -d "{
               \"event_type\": \"deploy_from_service\",
               \"client_payload\": {
-                \"branch\": \"$branch\",
+                \"branch\": \"${{ github.event.workflow_run.head_branch }}\",
                 \"service\": \"execution-service\"
               }
             }"

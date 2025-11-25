@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.execution.execution
+package com.example.snippetsearcher.execution
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class ExecutionApplication
 
 fun main(args: Array<String>) {
-	runApplication<ExecutionApplication>(*args)
+    runApplication<ExecutionApplication>(args = args)
 }

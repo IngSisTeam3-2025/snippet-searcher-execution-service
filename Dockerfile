@@ -5,13 +5,16 @@ WORKDIR /app
 ARG GPR_USER
 ARG GPR_KEY
 
-ENV GPR_USER=${GPR_USER}
-ENV GPR_KEY=${GPR_KEY}
+RUN mkdir -p /root/.gradle && \
+    echo "gpr.user=${GPR_USER}" >> /root/.gradle/gradle.properties && \
+    echo "gpr.key=${GPR_KEY}" >> /root/.gradle/gradle.properties
 
 COPY . .
 
-RUN gradle bootJar --no-daemon
+RUN chmod +x gradlew
 
+# LA LÍNEA CLAVE
+RUN ./gradlew build bootJar --no-daemon
 
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
