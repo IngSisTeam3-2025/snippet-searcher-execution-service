@@ -1,5 +1,4 @@
 FROM gradle:8.7.0-jdk17 AS builder
-
 WORKDIR /app
 
 ARG GPR_USER
