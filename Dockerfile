@@ -12,11 +12,7 @@ RUN mkdir -p /root/.gradle && \
 
 COPY . .
 
-RUN echo "--- listing source inside container ---" && ls -R /app/src/main/kotlin || true
-
-RUN echo "==== /root/.gradle/gradle.properties ====" && cat /root/.gradle/gradle.properties
-
-RUN gradle bootJar --no-daemon
+RUN ./gradlew bootJar --no-daemon
 
 
 FROM eclipse-temurin:17-jdk-jammy
