@@ -3,7 +3,7 @@ package com.example.snippetsearcher.execution.execution
 import com.example.snippetsearcher.execution.env.EnvClient
 import com.example.snippetsearcher.execution.execution.dto.ExecutionResponseDTO
 import com.example.snippetsearcher.execution.execution.dto.TestExecutionResponseDTO
-import com.example.snippetsearcher.execution.runner.LanguageRunner
+import com.example.snippetsearcher.execution.execution.runner.LanguageRunner
 import com.example.snippetsearcher.execution.snippet.SnippetClient
 import org.springframework.stereotype.Service
 import java.util.UUID

@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.execution.runner
+package com.example.snippetsearcher.execution.execution.runner
 
 import RunnerResult
 

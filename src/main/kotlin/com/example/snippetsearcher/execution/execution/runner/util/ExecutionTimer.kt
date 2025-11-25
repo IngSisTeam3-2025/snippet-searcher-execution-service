@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.execution.runner.util
+package com.example.snippetsearcher.execution.execution.runner.util
 
 class ExecutionTimer {
     private var start = 0L

@@ -1,12 +1,12 @@
-package com.example.snippetsearcher.execution.runner
+package com.example.snippetsearcher.execution.execution.runner
 
 import RunnerResult
 import com.example.snippetsearcher.execution.execution.util.StringReader
-import com.example.snippetsearcher.execution.runner.util.ExecutionOutputWriter
-import com.example.snippetsearcher.execution.runner.util.ExecutionTimer
-import com.example.snippetsearcher.execution.runner.util.InMemoryDiagnosticReporter
-import com.example.snippetsearcher.execution.runner.util.ListEnvReader
-import com.example.snippetsearcher.execution.runner.util.ListInputReader
+import com.example.snippetsearcher.execution.execution.runner.util.ExecutionOutputWriter
+import com.example.snippetsearcher.execution.execution.runner.util.ExecutionTimer
+import com.example.snippetsearcher.execution.execution.runner.util.InMemoryDiagnosticReporter
+import com.example.snippetsearcher.execution.execution.runner.util.ListEnvReader
+import com.example.snippetsearcher.execution.execution.runner.util.ListInputReader
 import interpreter.InterpreterRunner
 import interpreter.PrintScriptInterpreter
 import io.reader.env.EnvReader

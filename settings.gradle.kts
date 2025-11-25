@@ -1,1 +1,1 @@
-rootProject.name = "execution"
+rootProject.name = "execution-service"

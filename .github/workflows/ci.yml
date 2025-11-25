@@ -4,38 +4,17 @@ on:
   push:
     branches: [ main, dev ]
   pull_request:
+    branches: [ main, dev ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      GPR_USER: ${{ secrets.GPR_USER }}
-      GPR_KEY: ${{ secrets.GPR_KEY }}
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
           cache: gradle
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build and run checks
-        run: ./gradlew clean build --stacktrace
-
-      # === NUEVO ===
-      - name: Save commit SHA
-        run: echo "${GITHUB_SHA}" > commit.txt
-
-      - name: Upload commit SHA
-        uses: actions/upload-artifact@v4
-        with:
-          name: ci-commit
-          path: commit.txt
+      - run: chmod +x gradlew
+      - run: ./gradlew clean build --stacktrace

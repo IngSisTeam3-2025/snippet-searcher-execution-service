@@ -1,13 +1,13 @@
+package com.example.snippetsearcher.execution.env
+
 import com.example.snippetsearcher.execution.common.web.WebClientFactory
-import com.example.snippetsearcher.execution.env.EnvClient
-import com.example.snippetsearcher.execution.env.EnvServiceConfig
 import com.example.snippetsearcher.execution.env.dto.EnvResponseDTO
-import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.bodyToMono
 import java.util.Collections.emptyList
 import java.util.UUID
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class DefaultEnvClient(
     factory: WebClientFactory,
     config: EnvServiceConfig,
