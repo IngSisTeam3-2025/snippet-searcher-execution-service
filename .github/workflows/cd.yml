@@ -14,7 +14,7 @@ jobs:
       - name: Checkout the exact commit that CI built
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.workflow_run.head_commit.id }}
 
       - name: Determine tag
         id: vars
