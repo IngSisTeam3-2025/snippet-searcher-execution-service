@@ -10,6 +10,8 @@ RUN mkdir -p /root/.gradle && \
 
 COPY . .
 
+RUN chmod +x gradlew
+
 RUN ./gradlew bootJar --no-daemon
 
 FROM eclipse-temurin:17-jdk-jammy
