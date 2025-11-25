@@ -1,21 +1,17 @@
 FROM gradle:8.7.0-jdk17 AS builder
 
-WORKDIR /app
-
 ARG GPR_USER
 ARG GPR_KEY
 
-# configurar gradle dentro del contenedor
+WORKDIR /app
+
 RUN mkdir -p /root/.gradle && \
     echo "gpr.user=${GPR_USER}" >> /root/.gradle/gradle.properties && \
     echo "gpr.key=${GPR_KEY}" >> /root/.gradle/gradle.properties
 
 COPY . .
 
-RUN echo "==== /root/.gradle/gradle.properties ====" && cat /root/.gradle/gradle.properties
-
 RUN gradle bootJar --no-daemon
-
 
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
