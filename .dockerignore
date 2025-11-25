@@ -1,6 +1,0 @@
-.git
-build
-.gradle
-out
-**/*.class
-**/*.jar
