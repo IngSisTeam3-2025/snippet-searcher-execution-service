@@ -6,6 +6,5 @@ import java.util.*
 
 interface SnippetClient {
     fun getSnippetById(snippetId: UUID): SnippetResponseDTO
-
     fun getTestSnippetById(snippetId: UUID, testId: UUID): TestResponseDTO
 }

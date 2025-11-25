@@ -6,7 +6,7 @@ import com.example.snippetsearcher.execution.snippet.dto.SnippetResponseDTO
 import com.example.snippetsearcher.execution.snippet.dto.TestResponseDTO
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.bodyToMono
-import java.util.*
+import java.util.UUID
 
 @Service
 class DefaultSnippetClient(
