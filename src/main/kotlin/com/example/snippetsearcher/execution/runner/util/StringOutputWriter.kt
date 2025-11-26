@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.execution.execution.util
+package com.example.snippetsearcher.execution.runner.util
 
 import io.writer.OutputWriter
 

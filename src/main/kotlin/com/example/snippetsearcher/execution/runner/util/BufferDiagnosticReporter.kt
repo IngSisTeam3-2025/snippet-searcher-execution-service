@@ -1,9 +1,9 @@
-package com.example.snippetsearcher.execution.execution.runner.util
+package com.example.snippetsearcher.execution.runner.util
 
 import io.reporter.DiagnosticReporter
 import model.diagnostic.Diagnostic
 
-class InMemoryDiagnosticReporter : DiagnosticReporter {
+class BufferDiagnosticReporter : DiagnosticReporter {
     private val errors = mutableListOf<Diagnostic>()
 
     override fun report(diagnostic: Diagnostic) {

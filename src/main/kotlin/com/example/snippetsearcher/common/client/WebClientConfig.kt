@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.execution.common.web
+package com.example.snippetsearcher.common.client
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -7,5 +7,6 @@ import org.springframework.context.annotation.Configuration
 class WebClientConfig {
 
     @Bean
-    fun webClientFactory(): WebClientFactory = WebClientFactory()
+    fun webClientFactory(): WebClientFactory =
+        WebClientFactory()
 }

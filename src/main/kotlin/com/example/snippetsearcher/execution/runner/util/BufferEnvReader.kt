@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.execution.execution.runner.util
+package com.example.snippetsearcher.execution.runner.util
 
 import io.reader.env.EnvReader
 import model.value.BooleanValue
@@ -8,7 +8,7 @@ import model.value.StringValue
 import model.value.Value
 import type.option.Option
 
-class ListEnvReader(
+class BufferEnvReader(
     private val envs: Map<String, String>,
 ) : EnvReader {
 

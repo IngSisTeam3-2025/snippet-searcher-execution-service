@@ -1,8 +1,8 @@
-package com.example.snippetsearcher.execution.execution.runner.util
+package com.example.snippetsearcher.execution.runner.util
 
 import io.reader.input.InputReader
 
-class ListInputReader(
+class BufferInputReader(
     inputs: Collection<String>,
 ) : InputReader {
 

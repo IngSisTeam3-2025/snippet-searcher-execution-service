@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.execution.common.web
+package com.example.snippetsearcher.common.client
 
 import org.springframework.web.reactive.function.client.WebClient
 
