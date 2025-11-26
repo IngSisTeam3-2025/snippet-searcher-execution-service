@@ -1,11 +1,11 @@
-package com.example.snippetsearcher.execution
+package com.example.snippetsearcher
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class ExecutionApplication
+class ExecutionServiceApplication
 
 fun main(args: Array<String>) {
-    runApplication<ExecutionApplication>(args = args)
+    runApplication<ExecutionServiceApplication>(args = args)
 }

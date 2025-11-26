@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.execution.common.exception
+package com.example.snippetsearcher.common.exception
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus

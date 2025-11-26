@@ -2,7 +2,7 @@ import model.diagnostic.Diagnostic
 
 data class RunnerResult(
     val success: Boolean,
-    val output: String,
-    val diagnostics: List<Diagnostic>,
+    val output: Collection<String>,
+    val diagnostics: Collection<Diagnostic>,
     val runtimeMs: Long,
 )

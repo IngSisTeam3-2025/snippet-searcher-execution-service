@@ -1,9 +1,10 @@
-package com.example.snippetsearcher.execution.execution.runner
+package com.example.snippetsearcher.execution.runner
 
 import RunnerResult
 
-interface LanguageRunner {
+interface SnippetRunner {
     fun supports(language: String): Boolean
+
     fun run(
         code: String,
         version: String,

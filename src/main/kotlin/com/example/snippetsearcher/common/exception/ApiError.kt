@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.execution.common.exception
+package com.example.snippetsearcher.common.exception
 
 import java.time.Instant
 

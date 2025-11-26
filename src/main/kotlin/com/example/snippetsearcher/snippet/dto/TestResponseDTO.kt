@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.execution.snippet.dto
+package com.example.snippetsearcher.snippet.dto
 
 import java.util.UUID
 
