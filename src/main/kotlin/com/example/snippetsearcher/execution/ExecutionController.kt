@@ -21,7 +21,7 @@ class ExecutionController(
         @RequestHeader("X-User-Id") userId: UUID,
         @PathVariable snippetId: UUID,
     ): ResponseEntity<ExecutionResponseDTO> {
-        return ResponseEntity.ok(service.executeSnippet(snippetId, userId))
+        return ResponseEntity.ok(service.executeSnippet(userId, snippetId))
     }
 
     @PostMapping("/{snippetId}/tests/{testId}")

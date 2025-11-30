@@ -30,7 +30,7 @@ class ExecutionService(
         val runner = getRunner(snippet.language)
 
         val inputs = snippet.inputs
-        val envs = snippetClient.getAllEnvs(snippet.ownerId)
+        val envs = snippetClient.getAllEnvs(userId)
             .associate { it.key to it.value }
 
         val result = runner.run(
@@ -64,7 +64,7 @@ class ExecutionService(
 
         val runner = getRunner(snippet.language)
 
-        val envs = snippetClient.getAllEnvs(snippet.ownerId)
+        val envs = snippetClient.getAllEnvs(userId)
             .associate { it.key to it.value }
 
         val result = runner.run(
