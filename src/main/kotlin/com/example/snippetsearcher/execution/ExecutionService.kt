@@ -1,0 +1,90 @@
+package com.example.snippetsearcher.execution
+
+import com.example.snippetsearcher.common.exception.NotFoundException
+import com.example.snippetsearcher.execution.dto.ExecutionResponseDTO
+import com.example.snippetsearcher.execution.dto.TestExecutionResponseDTO
+import com.example.snippetsearcher.execution.model.Error
+import com.example.snippetsearcher.execution.model.Failed
+import com.example.snippetsearcher.execution.model.Passed
+import com.example.snippetsearcher.execution.model.Success
+import com.example.snippetsearcher.execution.runner.SnippetRunner
+import com.example.snippetsearcher.snippet.SnippetClient
+import org.springframework.stereotype.Service
+import java.util.UUID
+
+@Service
+class ExecutionService(
+    private val snippetClient: SnippetClient,
+    private val runners: Collection<SnippetRunner>,
+) {
+
+    private fun getRunner(language: String): SnippetRunner =
+        runners.firstOrNull { it.supports(language) }
+            ?: throw NotFoundException("Execution not supported for language '$language'")
+
+    fun executeSnippet(
+        userId: UUID,
+        snippetId: UUID,
+    ): ExecutionResponseDTO {
+        val snippet = snippetClient.getSnippet(userId, snippetId)
+        val runner = getRunner(snippet.language)
+
+        val inputs = snippet.inputs
+        val envs = snippetClient.getAllEnvs(snippet.ownerId)
+            .associate { it.key to it.value }
+
+        val result = runner.run(
+            code = snippet.content,
+            version = snippet.version,
+            inputs = inputs,
+            envs = envs,
+        )
+
+        val output: Collection<String> =
+            if (result.success) {
+                result.output
+            } else {
+                result.diagnostics.map { it.format() }
+            }
+
+        return ExecutionResponseDTO(
+            status = if (result.success) Success.label else Error.label,
+            output = output,
+            runtimeMs = result.runtimeMs,
+        )
+    }
+
+    fun executeTest(
+        userId: UUID,
+        snippetId: UUID,
+        testId: UUID,
+    ): TestExecutionResponseDTO {
+        val snippet = snippetClient.getSnippet(userId, snippetId)
+        val test = snippetClient.getSnippetTest(userId, snippetId, testId)
+
+        val runner = getRunner(snippet.language)
+
+        val envs = snippetClient.getAllEnvs(snippet.ownerId)
+            .associate { it.key to it.value }
+
+        val result = runner.run(
+            code = snippet.content,
+            version = snippet.version,
+            inputs = test.inputs,
+            envs = envs,
+        )
+
+        if (!result.success) {
+            return TestExecutionResponseDTO(Error.label, result.runtimeMs)
+        }
+
+        val output = result.output.filterNot { it.isBlank() }
+
+        val status = if (output == test.outputs.toList()) Passed.label else Failed.label
+
+        return TestExecutionResponseDTO(
+            status = status,
+            runtimeMs = result.runtimeMs,
+        )
+    }
+}
