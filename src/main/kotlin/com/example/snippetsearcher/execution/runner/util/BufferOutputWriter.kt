@@ -9,5 +9,5 @@ class BufferOutputWriter : OutputWriter {
         buffer.addAll(input)
     }
 
-    fun getOutput(): Collection<String> = buffer
+    fun getOutput(): Collection<String> = buffer.map { it.trimEnd() }
 }

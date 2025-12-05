@@ -4,6 +4,7 @@ import RunnerResult
 import com.example.snippetsearcher.execution.model.PrintScript
 import com.example.snippetsearcher.execution.runner.util.BufferDiagnosticReporter
 import com.example.snippetsearcher.execution.runner.util.BufferEnvReader
+import com.example.snippetsearcher.execution.runner.util.BufferInputReader
 import com.example.snippetsearcher.execution.runner.util.BufferOutputWriter
 import com.example.snippetsearcher.execution.runner.util.ExecutionTimer
 import com.example.snippetsearcher.execution.runner.util.StringReader
@@ -29,7 +30,7 @@ class PrintScriptRunner : SnippetRunner {
         envs: Map<String, String>,
     ): RunnerResult {
         val source: InputReader = StringReader(code)
-        val input: InputReader = com.example.snippetsearcher.execution.runner.util.BufferInputReader(inputs)
+        val input: InputReader = BufferInputReader(inputs)
         val env: EnvReader = BufferEnvReader(envs)
         val output = BufferOutputWriter()
         val reporter = BufferDiagnosticReporter()
