@@ -22,8 +22,16 @@ repositories {
 	mavenLocal()
 	mavenCentral()
 	maven {
-		name = "GitHubPackages"
+		name = "Printscript"
 		url = uri("https://maven.pkg.github.com/IngSisTeam3-2025/printscript")
+		credentials {
+			username = System.getenv("GPR_USER")
+			password = System.getenv("GPR_KEY")
+		}
+	}
+	maven {
+		name = "RedisStreamsMvc"
+		url = uri("https://maven.pkg.github.com/austral-ingsis/redis-streams-mvc")
 		credentials {
 			username = System.getenv("GPR_USER")
 			password = System.getenv("GPR_KEY")
@@ -130,5 +138,3 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 	exclude("**/*.class")
 	setSource(files("src/main/kotlin", "src/test/kotlin"))
 }
-
-
