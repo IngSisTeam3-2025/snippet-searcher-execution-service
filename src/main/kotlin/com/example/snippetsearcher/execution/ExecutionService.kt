@@ -1,7 +1,9 @@
 package com.example.snippetsearcher.execution
 
 import com.example.snippetsearcher.common.exception.NotFoundException
+import com.example.snippetsearcher.execution.dto.ExecutionRequestDTO
 import com.example.snippetsearcher.execution.dto.ExecutionResponseDTO
+import com.example.snippetsearcher.execution.dto.TestExecutionRequestDTO
 import com.example.snippetsearcher.execution.dto.TestExecutionResponseDTO
 import com.example.snippetsearcher.execution.model.Error
 import com.example.snippetsearcher.execution.model.Failed
@@ -24,18 +26,17 @@ class ExecutionService(
 
     fun executeSnippet(
         userId: UUID,
-        snippetId: UUID,
+        request: ExecutionRequestDTO,
     ): ExecutionResponseDTO {
-        val snippet = snippetClient.getSnippet(userId, snippetId)
-        val runner = getRunner(snippet.language)
+        val runner = getRunner(request.language)
 
-        val inputs = snippet.inputs
+        val inputs = request.inputs
         val envs = snippetClient.getAllEnvs(userId)
             .associate { it.key to it.value }
 
         val result = runner.run(
-            code = snippet.content,
-            version = snippet.version,
+            code = request.content,
+            version = request.version,
             inputs = inputs,
             envs = envs,
         )
@@ -56,34 +57,35 @@ class ExecutionService(
 
     fun executeTest(
         userId: UUID,
-        snippetId: UUID,
-        testId: UUID,
+        request: TestExecutionRequestDTO,
     ): TestExecutionResponseDTO {
-        val snippet = snippetClient.getSnippet(userId, snippetId)
-        val test = snippetClient.getSnippetTest(userId, snippetId, testId)
-
-        val runner = getRunner(snippet.language)
+        val runner = getRunner(request.language)
 
         val envs = snippetClient.getAllEnvs(userId)
             .associate { it.key to it.value }
 
         val result = runner.run(
-            code = snippet.content,
-            version = snippet.version,
-            inputs = test.inputs,
+            code = request.content,
+            version = request.version,
+            inputs = request.inputs,
             envs = envs,
         )
 
         if (!result.success) {
-            return TestExecutionResponseDTO(Error.label, result.runtimeMs)
+            return TestExecutionResponseDTO(
+                status = Error.label,
+                errors = result.diagnostics.map { it.format() },
+                runtimeMs = result.runtimeMs,
+            )
         }
 
         val output = result.output.filterNot { it.isBlank() }
 
-        val status = if (output == test.outputs.toList()) Passed.label else Failed.label
+        val status = if (output == request.outputs.toList()) Passed.label else Failed.label
 
         return TestExecutionResponseDTO(
             status = status,
+            errors = emptyList(),
             runtimeMs = result.runtimeMs,
         )
     }
