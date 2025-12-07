@@ -55,10 +55,13 @@ dependencies {
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
+	runtimeOnly("org.postgresql:postgresql")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	testImplementation("com.h2database:h2")
+
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6")
 }
 
 tasks.withType<Test> {
