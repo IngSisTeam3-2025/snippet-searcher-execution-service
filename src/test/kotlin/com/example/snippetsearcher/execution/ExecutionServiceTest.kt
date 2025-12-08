@@ -270,6 +270,7 @@ class ExecutionServiceTest {
         assertEquals("An unexpected error occurred", ex.message)
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.status)
     }
+
     @Test
     fun `BufferEnvReader should parse all supported types`() {
         val reader = BufferEnvReader(
@@ -278,8 +279,8 @@ class ExecutionServiceTest {
                 "boolFalse" to "false",
                 "intVal" to "42",
                 "floatVal" to "3.14",
-                "stringVal" to "hello"
-            )
+                "stringVal" to "hello",
+            ),
         )
 
         assertEquals(Option.Some(value = BooleanValue(true)), reader.read("boolTrue"))
