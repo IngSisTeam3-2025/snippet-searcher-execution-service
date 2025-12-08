@@ -1,7 +1,5 @@
 package com.example.snippetsearcher.execution.runner
 
-import RunnerResult
-
 interface SnippetRunner {
     fun supports(language: String): Boolean
 

@@ -1,6 +1,5 @@
 package com.example.snippetsearcher.execution.runner
 
-import RunnerResult
 import com.example.snippetsearcher.execution.model.PrintScript
 import com.example.snippetsearcher.execution.runner.util.BufferDiagnosticReporter
 import com.example.snippetsearcher.execution.runner.util.BufferEnvReader
