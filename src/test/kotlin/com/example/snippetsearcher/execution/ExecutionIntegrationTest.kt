@@ -16,8 +16,8 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
 @SpringBootTest
@@ -51,8 +51,8 @@ class ExecutionIntegrationTest {
                 id = UUID.randomUUID(),
                 ownerId = userId,
                 key = "a",
-                value = "10"
-            )
+                value = "10",
+            ),
         )
 
         val request = """
@@ -68,7 +68,7 @@ class ExecutionIntegrationTest {
             MockMvcRequestBuilders.post("/api/execute")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User-Id", userId.toString())
-                .content(request)
+                .content(request),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.status").value("success"))
@@ -95,7 +95,7 @@ class ExecutionIntegrationTest {
             MockMvcRequestBuilders.post("/api/execute/test")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User-Id", userId.toString())
-                .content(request)
+                .content(request),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.status").value("passed"))
@@ -122,7 +122,7 @@ class ExecutionIntegrationTest {
             MockMvcRequestBuilders.post("/api/execute/test")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User-Id", userId.toString())
-                .content(request)
+                .content(request),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.status").value("failed"))
@@ -148,11 +148,10 @@ class ExecutionIntegrationTest {
             MockMvcRequestBuilders.post("/api/execute/test")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User-Id", userId.toString())
-                .content(request)
+                .content(request),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.status").value("error"))
             .andExpect(jsonPath("$.errors").isArray)
     }
-
 }

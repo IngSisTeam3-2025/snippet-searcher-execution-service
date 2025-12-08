@@ -7,18 +7,25 @@ import com.example.snippetsearcher.execution.dto.ExecutionRequestDTO
 import com.example.snippetsearcher.execution.dto.TestExecutionRequestDTO
 import com.example.snippetsearcher.execution.runner.RunnerResult
 import com.example.snippetsearcher.execution.runner.SnippetRunner
+import com.example.snippetsearcher.execution.runner.util.BufferEnvReader
+import com.example.snippetsearcher.execution.runner.util.BufferInputReader
 import com.example.snippetsearcher.snippet.SnippetClient
 import com.example.snippetsearcher.snippet.dto.EnvResponseDTO
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import model.diagnostic.Diagnostic
+import model.value.BooleanValue
+import model.value.FloatValue
+import model.value.IntegerValue
+import model.value.StringValue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
+import type.option.Option
 import java.util.UUID
 
 class ExecutionServiceTest {
@@ -37,7 +44,6 @@ class ExecutionServiceTest {
             runners = listOf(runner),
         )
     }
-
 
     @Test
     fun `executeSnippet should call runner and return success response`() {
@@ -130,7 +136,6 @@ class ExecutionServiceTest {
             service.executeSnippet(UUID.randomUUID(), request)
         }
     }
-
 
     @Test
     fun `executeTest should return passed when outputs match`() {
@@ -244,24 +249,63 @@ class ExecutionServiceTest {
         }
     }
 
-    //Algunos tests para mas coverage
+    // Algunos tests para mas coverage
     @Test
     fun `NotFoundException should store message`() {
         val ex = NotFoundException("Resource missing")
         assertEquals("Resource missing", ex.message)
         assertEquals(HttpStatus.NOT_FOUND, ex.status)
     }
+
     @Test
     fun `ServiceRequestException should expose status and message`() {
         val ex = ServiceRequestException(HttpStatus.BAD_GATEWAY, "External failed")
         assertEquals("External failed", ex.message)
         assertEquals(HttpStatus.BAD_GATEWAY, ex.status)
     }
+
     @Test
     fun `InternalServerErrorException should have default message`() {
         val ex = InternalServerErrorException()
         assertEquals("An unexpected error occurred", ex.message)
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.status)
     }
+    @Test
+    fun `BufferEnvReader should parse all supported types`() {
+        val reader = BufferEnvReader(
+            mapOf(
+                "boolTrue" to "true",
+                "boolFalse" to "false",
+                "intVal" to "42",
+                "floatVal" to "3.14",
+                "stringVal" to "hello"
+            )
+        )
 
+        assertEquals(Option.Some(value = BooleanValue(true)), reader.read("boolTrue"))
+        assertEquals(Option.Some(value = BooleanValue(false)), reader.read("boolFalse"))
+        assertEquals(Option.Some(value = IntegerValue(42)), reader.read("intVal"))
+        assertEquals(Option.Some(value = FloatValue(3.14f)), reader.read("floatVal"))
+        assertEquals(Option.Some(value = StringValue("hello")), reader.read("stringVal"))
+    }
+
+    @Test
+    fun `BufferEnvReader should return None when key missing`() {
+        val reader = BufferEnvReader(mapOf())
+        assertTrue(reader.read("missing") is Option.None)
+    }
+
+    @Test
+    fun `BufferInputReader should return characters of first input`() {
+        val reader = BufferInputReader(listOf("abc"))
+        val result = reader.read().toList()
+        assertEquals(listOf('a', 'b', 'c'), result)
+    }
+
+    @Test
+    fun `BufferInputReader should return empty sequence when no more inputs`() {
+        val reader = BufferInputReader(emptyList())
+        val result = reader.read()
+        assertTrue(result.none())
+    }
 }
