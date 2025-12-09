@@ -1,3 +1,5 @@
+package com.example.snippetsearcher.execution.runner
+
 import model.diagnostic.Diagnostic
 
 data class RunnerResult(

@@ -22,8 +22,16 @@ repositories {
 	mavenLocal()
 	mavenCentral()
 	maven {
-		name = "GitHubPackages"
+		name = "Printscript"
 		url = uri("https://maven.pkg.github.com/IngSisTeam3-2025/printscript")
+		credentials {
+			username = System.getenv("GPR_USER")
+			password = System.getenv("GPR_KEY")
+		}
+	}
+	maven {
+		name = "RedisStreamsMvc"
+		url = uri("https://maven.pkg.github.com/austral-ingsis/redis-streams-mvc")
 		credentials {
 			username = System.getenv("GPR_USER")
 			password = System.getenv("GPR_KEY")
@@ -47,10 +55,14 @@ dependencies {
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
+	runtimeOnly("org.postgresql:postgresql")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	testImplementation("com.h2database:h2")
+	testImplementation("io.mockk:mockk:1.13.12")
+
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6")
 }
 
 tasks.withType<Test> {
@@ -86,7 +98,7 @@ kover {
 	verify {
 		rule {
 			bound {
-				minValue = 0
+				minValue = 80
 			}
 		}
 	}
@@ -130,5 +142,3 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
 	exclude("**/*.class")
 	setSource(files("src/main/kotlin", "src/test/kotlin"))
 }
-
-
