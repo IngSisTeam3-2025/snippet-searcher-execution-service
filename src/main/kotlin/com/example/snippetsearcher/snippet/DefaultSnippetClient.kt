@@ -40,9 +40,10 @@ class DefaultSnippetClient(
             .block() ?: throw InternalServerErrorException()
     }
 
-    override fun updateTestStatus(snippetId: UUID, testId: UUID, status: Status) {
+    override fun updateTestStatus(userId: UUID, snippetId: UUID, testId: UUID, status: Status) {
         client.put()
-            .uri("/internal/snippets/$snippetId/tests/$testId")
+            .uri("/internal/snippets/$snippetId/tests/$testId/status")
+            .header("X-User-Id", userId.toString())
             .bodyValue(TestStatusRequestDTO(status))
             .retrieve()
             .bodyToMono(Void::class.java)

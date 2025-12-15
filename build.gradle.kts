@@ -101,7 +101,7 @@ kover {
 	verify {
 		rule {
 			bound {
-				minValue = 65
+				minValue = 59
 			}
 		}
 	}

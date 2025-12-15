@@ -65,13 +65,13 @@ class TestJobConsumer(
                 outputs = event.outputs,
             )
 
-            val result = executionService.executeTest(event.ownerId, request)
+            val result = executionService.executeTest(event.ownerId, event.snippetId, event.testId, request)
 
             if (result.status == Status.ERROR) {
                 logger.warn("Test execution completed with errors for snippet: ${event.snippetId}")
             }
 
-            snippetClient.updateTestStatus(event.snippetId, event.testId, result.status)
+            snippetClient.updateTestStatus(event.ownerId, event.snippetId, event.testId, result.status)
 
             logger.info("Successfully processed test job for snippet: ${event.snippetId}")
         } catch (e: Exception) {

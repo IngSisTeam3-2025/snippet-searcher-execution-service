@@ -9,6 +9,7 @@ import com.example.snippetsearcher.execution.model.Status
 import com.example.snippetsearcher.execution.runner.SnippetRunner
 import com.example.snippetsearcher.snippet.SnippetClient
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -52,8 +53,11 @@ class ExecutionService(
         )
     }
 
+    @Transactional
     fun executeTest(
         userId: UUID,
+        snippetId: UUID,
+        testId: UUID,
         request: TestExecutionRequestDTO,
     ): TestExecutionResponseDTO {
         val runner = getRunner(request.language)
@@ -78,6 +82,8 @@ class ExecutionService(
         val output = result.output.filterNot { it.isBlank() }
 
         val status = if (output == request.outputs.toList()) Status.PASSED else Status.FAILED
+
+        snippetClient.updateTestStatus(userId, snippetId, testId, status)
 
         return TestExecutionResponseDTO(
             status = status,

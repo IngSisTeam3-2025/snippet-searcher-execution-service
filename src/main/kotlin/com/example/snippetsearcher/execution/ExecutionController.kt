@@ -6,6 +6,7 @@ import com.example.snippetsearcher.execution.dto.TestExecutionRequestDTO
 import com.example.snippetsearcher.execution.dto.TestExecutionResponseDTO
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -23,15 +24,15 @@ class ExecutionController(
     fun executeSnippet(
         @RequestHeader("X-User-Id") userId: UUID,
         @RequestBody @Valid request: ExecutionRequestDTO,
-    ): ResponseEntity<ExecutionResponseDTO> {
-        return ResponseEntity.ok(service.executeSnippet(userId, request))
-    }
+    ): ResponseEntity<ExecutionResponseDTO> =
+        ResponseEntity.ok(service.executeSnippet(userId, request))
 
-    @PostMapping("/test")
+    @PostMapping("/snippets/{snippetId}/tests/{testId}")
     fun executeTest(
         @RequestHeader("X-User-Id") userId: UUID,
+        @PathVariable snippetId: UUID,
+        @PathVariable testId: UUID,
         @RequestBody @Valid request: TestExecutionRequestDTO,
-    ): ResponseEntity<TestExecutionResponseDTO> {
-        return ResponseEntity.ok(service.executeTest(userId, request))
-    }
+    ): ResponseEntity<TestExecutionResponseDTO> =
+        ResponseEntity.ok(service.executeTest(userId, snippetId, testId, request))
 }

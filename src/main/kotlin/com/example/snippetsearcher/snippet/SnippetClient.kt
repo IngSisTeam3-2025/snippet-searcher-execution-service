@@ -6,5 +6,5 @@ import java.util.UUID
 
 interface SnippetClient {
     fun getAllEnvs(userId: UUID): Collection<EnvResponseDTO>
-    fun updateTestStatus(snippetId: UUID, testId: UUID, status: Status)
+    fun updateTestStatus(userId: UUID, snippetId: UUID, testId: UUID, status: Status)
 }
