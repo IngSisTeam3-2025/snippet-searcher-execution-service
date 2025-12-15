@@ -54,6 +54,40 @@ class ExecutionService(
     }
 
     @Transactional
+    fun executeTestStateless(
+        userId: UUID,
+        request: TestExecutionRequestDTO,
+    ): TestExecutionResponseDTO {
+        val runner = getRunner(request.language)
+
+        val envs = snippetClient.getAllEnvs(userId)
+            .associate { it.key to it.value }
+
+        val result = runner.run(
+            code = request.content,
+            version = request.version,
+            inputs = request.inputs,
+            envs = envs,
+        )
+
+        if (!result.success) {
+            return TestExecutionResponseDTO(
+                status = Status.ERROR,
+                errors = result.diagnostics.map { it.format() },
+            )
+        }
+
+        val output = result.output.filterNot { it.isBlank() }
+
+        val status = if (output == request.outputs.toList()) Status.PASSED else Status.FAILED
+
+        return TestExecutionResponseDTO(
+            status = status,
+            errors = emptyList(),
+        )
+    }
+
+    @Transactional
     fun executeTest(
         userId: UUID,
         snippetId: UUID,

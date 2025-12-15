@@ -27,6 +27,13 @@ class ExecutionController(
     ): ResponseEntity<ExecutionResponseDTO> =
         ResponseEntity.ok(service.executeSnippet(userId, request))
 
+    @PostMapping("/test")
+    fun executeTestStateless(
+        @RequestHeader("X-User-Id") userId: UUID,
+        @RequestBody @Valid request: TestExecutionRequestDTO,
+    ): ResponseEntity<TestExecutionResponseDTO> =
+        ResponseEntity.ok(service.executeTestStateless(userId, request))
+
     @PostMapping("/snippets/{snippetId}/tests/{testId}")
     fun executeTest(
         @RequestHeader("X-User-Id") userId: UUID,
