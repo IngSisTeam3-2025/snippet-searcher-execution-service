@@ -5,10 +5,7 @@ import com.example.snippetsearcher.execution.dto.ExecutionRequestDTO
 import com.example.snippetsearcher.execution.dto.ExecutionResponseDTO
 import com.example.snippetsearcher.execution.dto.TestExecutionRequestDTO
 import com.example.snippetsearcher.execution.dto.TestExecutionResponseDTO
-import com.example.snippetsearcher.execution.model.Error
-import com.example.snippetsearcher.execution.model.Failed
-import com.example.snippetsearcher.execution.model.Passed
-import com.example.snippetsearcher.execution.model.Success
+import com.example.snippetsearcher.execution.model.Status
 import com.example.snippetsearcher.execution.runner.SnippetRunner
 import com.example.snippetsearcher.snippet.SnippetClient
 import org.springframework.stereotype.Service
@@ -49,7 +46,7 @@ class ExecutionService(
             }
 
         return ExecutionResponseDTO(
-            status = if (result.success) Success.label else Error.label,
+            status = if (result.success) Status.SUCCESS else Status.ERROR,
             output = output,
             runtimeMs = result.runtimeMs,
         )
@@ -73,20 +70,18 @@ class ExecutionService(
 
         if (!result.success) {
             return TestExecutionResponseDTO(
-                status = Error.label,
+                status = Status.ERROR,
                 errors = result.diagnostics.map { it.format() },
-                runtimeMs = result.runtimeMs,
             )
         }
 
         val output = result.output.filterNot { it.isBlank() }
 
-        val status = if (output == request.outputs.toList()) Passed.label else Failed.label
+        val status = if (output == request.outputs.toList()) Status.PASSED else Status.FAILED
 
         return TestExecutionResponseDTO(
             status = status,
             errors = emptyList(),
-            runtimeMs = result.runtimeMs,
         )
     }
 }

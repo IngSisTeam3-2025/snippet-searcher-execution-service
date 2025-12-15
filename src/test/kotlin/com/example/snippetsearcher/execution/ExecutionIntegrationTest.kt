@@ -1,5 +1,6 @@
 package com.example.snippetsearcher.execution
 
+import com.example.snippetsearcher.execution.model.Status
 import com.example.snippetsearcher.snippet.SnippetClient
 import com.example.snippetsearcher.snippet.dto.EnvResponseDTO
 import io.mockk.clearMocks
@@ -71,7 +72,7 @@ class ExecutionIntegrationTest {
                 .content(request),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value("success"))
+            .andExpect(jsonPath("$.status").value(Status.SUCCESS.name))
             .andExpect(jsonPath("$.output[0]").value("5"))
     }
 
@@ -98,7 +99,7 @@ class ExecutionIntegrationTest {
                 .content(request),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value("passed"))
+            .andExpect(jsonPath("$.status").value(Status.PASSED.name))
             .andExpect(jsonPath("$.errors").isEmpty)
     }
 
@@ -125,7 +126,7 @@ class ExecutionIntegrationTest {
                 .content(request),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value("failed"))
+            .andExpect(jsonPath("$.status").value(Status.FAILED.name))
     }
 
     @Test
@@ -151,7 +152,7 @@ class ExecutionIntegrationTest {
                 .content(request),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value("error"))
+            .andExpect(jsonPath("$.status").value(Status.ERROR.name))
             .andExpect(jsonPath("$.errors").isArray)
     }
 }

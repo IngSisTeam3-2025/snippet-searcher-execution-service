@@ -5,6 +5,7 @@ import com.example.snippetsearcher.common.exception.NotFoundException
 import com.example.snippetsearcher.common.exception.ServiceRequestException
 import com.example.snippetsearcher.execution.dto.ExecutionRequestDTO
 import com.example.snippetsearcher.execution.dto.TestExecutionRequestDTO
+import com.example.snippetsearcher.execution.model.Status
 import com.example.snippetsearcher.execution.runner.RunnerResult
 import com.example.snippetsearcher.execution.runner.SnippetRunner
 import com.example.snippetsearcher.execution.runner.util.BufferEnvReader
@@ -79,7 +80,7 @@ class ExecutionServiceTest {
 
         val result = service.executeSnippet(userId, request)
 
-        assertEquals("success", result.status) // status labels are lowercase
+        assertEquals(Status.SUCCESS, result.status) // status labels are lowercase
         assertEquals(listOf("1"), result.output.toList())
         assertEquals(15, result.runtimeMs)
 
@@ -116,7 +117,7 @@ class ExecutionServiceTest {
 
         val result = service.executeSnippet(userId, request)
 
-        assertEquals("error", result.status)
+        assertEquals(Status.ERROR, result.status)
         assertEquals(2, result.output.size)
         assertEquals(22, result.runtimeMs)
     }
@@ -163,9 +164,8 @@ class ExecutionServiceTest {
 
         val result = service.executeTest(userId, request)
 
-        assertEquals("passed", result.status)
+        assertEquals(Status.PASSED, result.status)
         assertTrue(result.errors.isEmpty())
-        assertEquals(10, result.runtimeMs)
     }
 
     @Test
@@ -194,7 +194,7 @@ class ExecutionServiceTest {
 
         val result = service.executeTest(userId, request)
 
-        assertEquals("failed", result.status)
+        assertEquals(Status.FAILED, result.status)
         assertTrue(result.errors.isEmpty())
     }
 
@@ -227,9 +227,8 @@ class ExecutionServiceTest {
 
         val result = service.executeTest(userId, request)
 
-        assertEquals("error", result.status)
+        assertEquals(Status.ERROR, result.status)
         assertEquals(1, result.errors.size)
-        assertEquals(25, result.runtimeMs)
     }
 
     @Test

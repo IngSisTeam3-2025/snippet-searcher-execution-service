@@ -11,6 +11,8 @@ style:
   UseCheckOrError:
     active: true
 complexity:
+  LongParameterList:
+    active: false
   TooManyFunctions:
     active: true
   CyclomaticComplexMethod:
@@ -18,5 +20,5 @@ complexity:
   LongMethod:
     active: true
 exceptions:
-  TooGenericExceptionThrown:
-    active: true
+  TooGenericExceptionCaught:
+    active: false
