@@ -37,7 +37,7 @@ class ExecutionService(
         val envs = snippetClient.getAllEnvs(userId)
             .associate { it.key to it.value }
 
-        logger.debug("Retrieved ${envs.size} environment variables for user: $userId")
+        logger.info("Retrieved: amount=${envs.size} environment variables for user: userId=$userId")
 
         val result = runner.run(
             code = request.content,

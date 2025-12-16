@@ -27,6 +27,8 @@ class CorrelationIdFilter : OncePerRequestFilter() {
             logger.warn("Missing $CORRELATION_ID_KEY for request: method=${request.method}, path=${request.requestURI}")
         }
 
+        logger.info("$CORRELATION_ID_KEY for execution: $correlationId")
+
         try {
             MDC.put(CORRELATION_ID_KEY, correlationId)
             NewRelic.addCustomParameter(CORRELATION_ID_KEY, correlationId)
