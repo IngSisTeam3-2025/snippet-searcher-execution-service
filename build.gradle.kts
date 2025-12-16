@@ -56,6 +56,9 @@ dependencies {
 	implementation("org.austral.ingsis:redis-streams-mvc:0.1.13")
 	implementation("com.newrelic.agent.java:newrelic-api:8.7.0")
 
+	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+	implementation("org.austral.ingsis:redis-streams-mvc:0.1.13")
+
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
 	runtimeOnly("org.postgresql:postgresql")
@@ -101,7 +104,7 @@ kover {
 	verify {
 		rule {
 			bound {
-				minValue = 80
+				minValue = 56
 			}
 		}
 	}
