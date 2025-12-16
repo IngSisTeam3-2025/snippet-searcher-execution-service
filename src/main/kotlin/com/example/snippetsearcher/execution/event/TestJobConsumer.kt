@@ -39,7 +39,7 @@ class TestJobConsumer(
         const val CORRELATION_ID_KEY = "correlationId"
     }
 
-    override fun onMessage(record: ObjectRecord<String, EventWrapper>) {
+    public override fun onMessage(record: ObjectRecord<String, EventWrapper>) {
         val correlationId = UUID.randomUUID().toString()
 
         try {
