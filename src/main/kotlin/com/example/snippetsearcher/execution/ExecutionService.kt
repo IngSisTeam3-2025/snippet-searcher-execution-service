@@ -5,13 +5,11 @@ import com.example.snippetsearcher.execution.dto.ExecutionRequestDTO
 import com.example.snippetsearcher.execution.dto.ExecutionResponseDTO
 import com.example.snippetsearcher.execution.dto.TestExecutionRequestDTO
 import com.example.snippetsearcher.execution.dto.TestExecutionResponseDTO
-import com.example.snippetsearcher.execution.model.Error
-import com.example.snippetsearcher.execution.model.Failed
-import com.example.snippetsearcher.execution.model.Passed
-import com.example.snippetsearcher.execution.model.Success
+import com.example.snippetsearcher.execution.model.Status
 import com.example.snippetsearcher.execution.runner.SnippetRunner
 import com.example.snippetsearcher.snippet.SnippetClient
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Service
@@ -49,13 +47,14 @@ class ExecutionService(
             }
 
         return ExecutionResponseDTO(
-            status = if (result.success) Success.label else Error.label,
+            status = if (result.success) Status.SUCCESS else Status.ERROR,
             output = output,
             runtimeMs = result.runtimeMs,
         )
     }
 
-    fun executeTest(
+    @Transactional
+    fun executeTestStateless(
         userId: UUID,
         request: TestExecutionRequestDTO,
     ): TestExecutionResponseDTO {
@@ -73,20 +72,56 @@ class ExecutionService(
 
         if (!result.success) {
             return TestExecutionResponseDTO(
-                status = Error.label,
+                status = Status.ERROR,
                 errors = result.diagnostics.map { it.format() },
-                runtimeMs = result.runtimeMs,
             )
         }
 
         val output = result.output.filterNot { it.isBlank() }
 
-        val status = if (output == request.outputs.toList()) Passed.label else Failed.label
+        val status = if (output == request.outputs.toList()) Status.PASSED else Status.FAILED
 
         return TestExecutionResponseDTO(
             status = status,
             errors = emptyList(),
-            runtimeMs = result.runtimeMs,
+        )
+    }
+
+    @Transactional
+    fun executeTest(
+        userId: UUID,
+        snippetId: UUID,
+        testId: UUID,
+        request: TestExecutionRequestDTO,
+    ): TestExecutionResponseDTO {
+        val runner = getRunner(request.language)
+
+        val envs = snippetClient.getAllEnvs(userId)
+            .associate { it.key to it.value }
+
+        val result = runner.run(
+            code = request.content,
+            version = request.version,
+            inputs = request.inputs,
+            envs = envs,
+        )
+
+        if (!result.success) {
+            return TestExecutionResponseDTO(
+                status = Status.ERROR,
+                errors = result.diagnostics.map { it.format() },
+            )
+        }
+
+        val output = result.output.filterNot { it.isBlank() }
+
+        val status = if (output == request.outputs.toList()) Status.PASSED else Status.FAILED
+
+        snippetClient.updateTestStatus(userId, snippetId, testId, status)
+
+        return TestExecutionResponseDTO(
+            status = status,
+            errors = emptyList(),
         )
     }
 }

@@ -3,7 +3,9 @@ package com.example.snippetsearcher.snippet
 import com.example.snippetsearcher.common.client.WebClientFactory
 import com.example.snippetsearcher.common.exception.InternalServerErrorException
 import com.example.snippetsearcher.common.exception.ServiceRequestException
+import com.example.snippetsearcher.execution.model.Status
 import com.example.snippetsearcher.snippet.dto.EnvResponseDTO
+import com.example.snippetsearcher.snippet.dto.TestStatusRequestDTO
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -36,5 +38,15 @@ class DefaultSnippetClient(
             }
             .bodyToMono<Collection<EnvResponseDTO>>()
             .block() ?: throw InternalServerErrorException()
+    }
+
+    override fun updateTestStatus(userId: UUID, snippetId: UUID, testId: UUID, status: Status) {
+        client.put()
+            .uri("/internal/snippets/$snippetId/tests/$testId/status")
+            .header("X-User-Id", userId.toString())
+            .bodyValue(TestStatusRequestDTO(status))
+            .retrieve()
+            .bodyToMono(Void::class.java)
+            .block()
     }
 }

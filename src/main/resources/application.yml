@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: execution
+
+redis:
+  streams:
+    test-jobs: test-jobs-stream
+  groups:
+    test-jobs: test-job-group
+
+services:
+  snippet-service:
+    url: http://snippet-service:8080
+  asset-service:
+    url: http://asset-service:8080

@@ -1,10 +1,13 @@
 package com.example.snippetsearcher.execution
 
+import com.example.snippetsearcher.execution.model.Status
 import com.example.snippetsearcher.snippet.SnippetClient
 import com.example.snippetsearcher.snippet.dto.EnvResponseDTO
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -71,15 +74,18 @@ class ExecutionIntegrationTest {
                 .content(request),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value("success"))
+            .andExpect(jsonPath("$.status").value(Status.SUCCESS.name))
             .andExpect(jsonPath("$.output[0]").value("5"))
     }
 
     @Test
     fun `executeTest should return PASSED when output matches expected`() {
         val userId = UUID.randomUUID()
+        val snippetId = UUID.randomUUID()
+        val testId = UUID.randomUUID()
 
         every { snippetClient.getAllEnvs(userId) } returns emptyList()
+        justRun { snippetClient.updateTestStatus(userId, snippetId, testId, Status.PASSED) }
 
         val request = """
             {
@@ -92,21 +98,26 @@ class ExecutionIntegrationTest {
         """.trimIndent()
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/execute/test")
+            MockMvcRequestBuilders.post("/api/execute/snippets/$snippetId/tests/$testId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User-Id", userId.toString())
                 .content(request),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value("passed"))
+            .andExpect(jsonPath("$.status").value(Status.PASSED.name))
             .andExpect(jsonPath("$.errors").isEmpty)
+
+        verify { snippetClient.updateTestStatus(userId, snippetId, testId, Status.PASSED) }
     }
 
     @Test
     fun `executeTest should return FAILED when output does not match expected`() {
         val userId = UUID.randomUUID()
+        val snippetId = UUID.randomUUID()
+        val testId = UUID.randomUUID()
 
         every { snippetClient.getAllEnvs(userId) } returns emptyList()
+        justRun { snippetClient.updateTestStatus(userId, snippetId, testId, Status.FAILED) }
 
         val request = """
             {
@@ -119,18 +130,22 @@ class ExecutionIntegrationTest {
         """.trimIndent()
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/execute/test")
+            MockMvcRequestBuilders.post("/api/execute/snippets/$snippetId/tests/$testId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User-Id", userId.toString())
                 .content(request),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value("failed"))
+            .andExpect(jsonPath("$.status").value(Status.FAILED.name))
+
+        verify { snippetClient.updateTestStatus(userId, snippetId, testId, Status.FAILED) }
     }
 
     @Test
     fun `executeTest should return ERROR when interpreter reports errors`() {
         val userId = UUID.randomUUID()
+        val snippetId = UUID.randomUUID()
+        val testId = UUID.randomUUID()
 
         every { snippetClient.getAllEnvs(userId) } returns emptyList()
 
@@ -145,13 +160,15 @@ class ExecutionIntegrationTest {
         """.trimIndent()
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/execute/test")
+            MockMvcRequestBuilders.post("/api/execute/snippets/$snippetId/tests/$testId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User-Id", userId.toString())
                 .content(request),
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.status").value("error"))
+            .andExpect(jsonPath("$.status").value(Status.ERROR.name))
             .andExpect(jsonPath("$.errors").isArray)
+
+        verify(exactly = 0) { snippetClient.updateTestStatus(any(), any(), any(), any()) }
     }
 }

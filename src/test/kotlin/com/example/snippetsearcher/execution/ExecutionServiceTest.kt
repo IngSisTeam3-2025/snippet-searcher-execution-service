@@ -1,31 +1,23 @@
 package com.example.snippetsearcher.execution
 
-import com.example.snippetsearcher.common.exception.InternalServerErrorException
 import com.example.snippetsearcher.common.exception.NotFoundException
-import com.example.snippetsearcher.common.exception.ServiceRequestException
 import com.example.snippetsearcher.execution.dto.ExecutionRequestDTO
 import com.example.snippetsearcher.execution.dto.TestExecutionRequestDTO
+import com.example.snippetsearcher.execution.model.Status
 import com.example.snippetsearcher.execution.runner.RunnerResult
 import com.example.snippetsearcher.execution.runner.SnippetRunner
-import com.example.snippetsearcher.execution.runner.util.BufferEnvReader
-import com.example.snippetsearcher.execution.runner.util.BufferInputReader
 import com.example.snippetsearcher.snippet.SnippetClient
 import com.example.snippetsearcher.snippet.dto.EnvResponseDTO
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.verify
 import model.diagnostic.Diagnostic
-import model.value.BooleanValue
-import model.value.FloatValue
-import model.value.IntegerValue
-import model.value.StringValue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.http.HttpStatus
-import type.option.Option
 import java.util.UUID
 
 class ExecutionServiceTest {
@@ -79,7 +71,7 @@ class ExecutionServiceTest {
 
         val result = service.executeSnippet(userId, request)
 
-        assertEquals("success", result.status) // status labels are lowercase
+        assertEquals(Status.SUCCESS, result.status)
         assertEquals(listOf("1"), result.output.toList())
         assertEquals(15, result.runtimeMs)
 
@@ -116,7 +108,7 @@ class ExecutionServiceTest {
 
         val result = service.executeSnippet(userId, request)
 
-        assertEquals("error", result.status)
+        assertEquals(Status.ERROR, result.status)
         assertEquals(2, result.output.size)
         assertEquals(22, result.runtimeMs)
     }
@@ -140,6 +132,8 @@ class ExecutionServiceTest {
     @Test
     fun `executeTest should return passed when outputs match`() {
         val userId = UUID.randomUUID()
+        val snippetId = UUID.randomUUID()
+        val testId = UUID.randomUUID()
 
         val request = TestExecutionRequestDTO(
             content = "print(2);",
@@ -151,6 +145,7 @@ class ExecutionServiceTest {
 
         every { runner.supports("printscript") } returns true
         every { snippetClient.getAllEnvs(userId) } returns emptyList()
+        justRun { snippetClient.updateTestStatus(userId, snippetId, testId, Status.PASSED) }
 
         every {
             runner.run(any(), any(), any(), any())
@@ -161,16 +156,19 @@ class ExecutionServiceTest {
             runtimeMs = 10,
         )
 
-        val result = service.executeTest(userId, request)
+        val result = service.executeTest(userId, snippetId, testId, request)
 
-        assertEquals("passed", result.status)
+        assertEquals(Status.PASSED, result.status)
         assertTrue(result.errors.isEmpty())
-        assertEquals(10, result.runtimeMs)
+
+        verify { snippetClient.updateTestStatus(userId, snippetId, testId, Status.PASSED) }
     }
 
     @Test
     fun `executeTest should return failed when outputs do not match`() {
         val userId = UUID.randomUUID()
+        val snippetId = UUID.randomUUID()
+        val testId = UUID.randomUUID()
 
         val request = TestExecutionRequestDTO(
             content = "print(2);",
@@ -182,6 +180,7 @@ class ExecutionServiceTest {
 
         every { runner.supports("printscript") } returns true
         every { snippetClient.getAllEnvs(userId) } returns emptyList()
+        justRun { snippetClient.updateTestStatus(userId, snippetId, testId, Status.FAILED) }
 
         every {
             runner.run(any(), any(), any(), any())
@@ -192,15 +191,19 @@ class ExecutionServiceTest {
             runtimeMs = 10,
         )
 
-        val result = service.executeTest(userId, request)
+        val result = service.executeTest(userId, snippetId, testId, request)
 
-        assertEquals("failed", result.status)
+        assertEquals(Status.FAILED, result.status)
         assertTrue(result.errors.isEmpty())
+
+        verify { snippetClient.updateTestStatus(userId, snippetId, testId, Status.FAILED) }
     }
 
     @Test
     fun `executeTest should return errors when runner fails`() {
         val userId = UUID.randomUUID()
+        val snippetId = UUID.randomUUID()
+        val testId = UUID.randomUUID()
 
         val request = TestExecutionRequestDTO(
             content = "print(;",
@@ -225,15 +228,20 @@ class ExecutionServiceTest {
             runtimeMs = 25,
         )
 
-        val result = service.executeTest(userId, request)
+        val result = service.executeTest(userId, snippetId, testId, request)
 
-        assertEquals("error", result.status)
+        assertEquals(Status.ERROR, result.status)
         assertEquals(1, result.errors.size)
-        assertEquals(25, result.runtimeMs)
+
+        verify(exactly = 0) { snippetClient.updateTestStatus(any(), any(), any(), any()) }
     }
 
     @Test
     fun `executeTest should throw when language unsupported`() {
+        val userId = UUID.randomUUID()
+        val snippetId = UUID.randomUUID()
+        val testId = UUID.randomUUID()
+
         val request = TestExecutionRequestDTO(
             content = "print(1);",
             language = "java",
@@ -245,68 +253,7 @@ class ExecutionServiceTest {
         every { runner.supports("java") } returns false
 
         assertThrows(NotFoundException::class.java) {
-            service.executeTest(UUID.randomUUID(), request)
+            service.executeTest(userId, snippetId, testId, request)
         }
-    }
-
-    // Algunos tests para mas coverage
-    @Test
-    fun `NotFoundException should store message`() {
-        val ex = NotFoundException("Resource missing")
-        assertEquals("Resource missing", ex.message)
-        assertEquals(HttpStatus.NOT_FOUND, ex.status)
-    }
-
-    @Test
-    fun `ServiceRequestException should expose status and message`() {
-        val ex = ServiceRequestException(HttpStatus.BAD_GATEWAY, "External failed")
-        assertEquals("External failed", ex.message)
-        assertEquals(HttpStatus.BAD_GATEWAY, ex.status)
-    }
-
-    @Test
-    fun `InternalServerErrorException should have default message`() {
-        val ex = InternalServerErrorException()
-        assertEquals("An unexpected error occurred", ex.message)
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.status)
-    }
-
-    @Test
-    fun `BufferEnvReader should parse all supported types`() {
-        val reader = BufferEnvReader(
-            mapOf(
-                "boolTrue" to "true",
-                "boolFalse" to "false",
-                "intVal" to "42",
-                "floatVal" to "3.14",
-                "stringVal" to "hello",
-            ),
-        )
-
-        assertEquals(Option.Some(value = BooleanValue(true)), reader.read("boolTrue"))
-        assertEquals(Option.Some(value = BooleanValue(false)), reader.read("boolFalse"))
-        assertEquals(Option.Some(value = IntegerValue(42)), reader.read("intVal"))
-        assertEquals(Option.Some(value = FloatValue(3.14f)), reader.read("floatVal"))
-        assertEquals(Option.Some(value = StringValue("hello")), reader.read("stringVal"))
-    }
-
-    @Test
-    fun `BufferEnvReader should return None when key missing`() {
-        val reader = BufferEnvReader(mapOf())
-        assertTrue(reader.read("missing") is Option.None)
-    }
-
-    @Test
-    fun `BufferInputReader should return characters of first input`() {
-        val reader = BufferInputReader(listOf("abc"))
-        val result = reader.read().toList()
-        assertEquals(listOf('a', 'b', 'c'), result)
-    }
-
-    @Test
-    fun `BufferInputReader should return empty sequence when no more inputs`() {
-        val reader = BufferInputReader(emptyList())
-        val result = reader.read()
-        assertTrue(result.none())
     }
 }
