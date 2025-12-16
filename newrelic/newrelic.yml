@@ -6,7 +6,7 @@
 #
 # This section is for settings common to all environments.
 # Do not add anything above this next line.
-common: &default_settings
+common:
 
   # ============================== LICENSE KEY ===============================
   # You must specify the license key associated with your New Relic
@@ -100,6 +100,9 @@ common: &default_settings
       # When true, application logs will be forwarded to New Relic. The default is true.
       enabled: true
 
+      context_data:
+        enabled: true
+
       # Application log events are collected up to the configured amount. Afterwards,
       # events are sampled to maintain an even distribution across the harvest cycle.
       # Default is 10000. Setting to 0 will disable.
@@ -115,10 +118,10 @@ common: &default_settings
       # The agent will add linking metadata to each log line in your application log files.
       # This feature should only be used if you want to use a third party log forwarder, instead
       # of the agent's built-in forwarding feature, to send your application log events to New Relic.
-      #local_decorating:
+    local_decorating:
 
       # When true, the agent will decorate your application log files with linking metadata. The default is false.
-      #enabled: false
+      enabled: true
 
   # Proxy settings for connecting to the New Relic server:
   # If a proxy is used, the host setting is required.  Other settings
@@ -146,9 +149,8 @@ common: &default_settings
 
     #A comma separated list of attribute keys whose values should
     # be sent to New Relic.
-    #include:
     include:
-      - request.id
+      - correlationId
 
     # A comma separated list of attribute keys whose values should
     # not be sent to New Relic.
@@ -281,7 +283,8 @@ common: &default_settings
       enabled: true
 
       # A comma separated list of attribute keys whose values should be sent to New Relic.
-      #include:
+      include:
+        - correlationId
 
       # A comma separated list of attribute keys whose values should not be sent to New Relic.
       #exclude:
