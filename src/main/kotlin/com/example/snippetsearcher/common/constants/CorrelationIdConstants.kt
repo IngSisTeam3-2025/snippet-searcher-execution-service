@@ -1,4 +1,4 @@
-package com.example.snippetsearcher.constants
+package com.example.snippetsearcher.common.constants
 
 object CorrelationIdConstants {
     const val CORRELATION_ID_HEADER = "X-Correlation-Id"

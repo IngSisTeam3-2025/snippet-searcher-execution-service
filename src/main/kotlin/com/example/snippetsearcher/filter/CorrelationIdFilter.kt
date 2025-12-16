@@ -1,7 +1,7 @@
 package com.example.snippetsearcher.filter
 
-import com.example.snippetsearcher.constants.CorrelationIdConstants.CORRELATION_ID_HEADER
-import com.example.snippetsearcher.constants.CorrelationIdConstants.CORRELATION_ID_KEY
+import com.example.snippetsearcher.common.constants.CorrelationIdConstants.CORRELATION_ID_HEADER
+import com.example.snippetsearcher.common.constants.CorrelationIdConstants.CORRELATION_ID_KEY
 import com.newrelic.api.agent.NewRelic
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest

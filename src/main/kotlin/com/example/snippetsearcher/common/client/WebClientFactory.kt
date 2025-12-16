@@ -1,7 +1,7 @@
 package com.example.snippetsearcher.common.client
 
-import com.example.snippetsearcher.constants.CorrelationIdConstants.CORRELATION_ID_HEADER
-import com.example.snippetsearcher.constants.CorrelationIdConstants.CORRELATION_ID_KEY
+import com.example.snippetsearcher.common.constants.CorrelationIdConstants.CORRELATION_ID_HEADER
+import com.example.snippetsearcher.common.constants.CorrelationIdConstants.CORRELATION_ID_KEY
 import org.slf4j.MDC
 import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.WebClient
