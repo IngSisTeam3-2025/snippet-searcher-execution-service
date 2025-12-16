@@ -33,7 +33,7 @@ class TestJobConsumer(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override fun onMessage(record: ObjectRecord<String, EventWrapper>) {
+    public override fun onMessage(record: ObjectRecord<String, EventWrapper>) {
         try {
             val wrapper = record.value
             val job = objectMapper.readValue(wrapper.payload, TestJobEvent::class.java)

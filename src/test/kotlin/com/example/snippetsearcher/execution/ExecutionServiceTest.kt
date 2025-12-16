@@ -256,4 +256,165 @@ class ExecutionServiceTest {
             service.executeTest(userId, snippetId, testId, request)
         }
     }
+
+    @Test
+    fun `executeTestStateless should return passed when outputs match`() {
+        val userId = UUID.randomUUID()
+
+        val request = TestExecutionRequestDTO(
+            content = "print(42);",
+            language = "printscript",
+            version = "1.0",
+            inputs = emptyList(),
+            outputs = listOf("42"),
+        )
+
+        every { runner.supports("printscript") } returns true
+        every { snippetClient.getAllEnvs(userId) } returns emptyList()
+
+        every {
+            runner.run(any(), any(), any(), any())
+        } returns RunnerResult(
+            success = true,
+            output = listOf("42"),
+            diagnostics = emptyList(),
+            runtimeMs = 10,
+        )
+
+        val result = service.executeTestStateless(userId, request)
+
+        assertEquals(Status.PASSED, result.status)
+        assertTrue(result.errors.isEmpty())
+
+        verify(exactly = 0) { snippetClient.updateTestStatus(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `executeTestStateless should return failed when outputs do not match`() {
+        val userId = UUID.randomUUID()
+
+        val request = TestExecutionRequestDTO(
+            content = "print(42);",
+            language = "printscript",
+            version = "1.0",
+            inputs = emptyList(),
+            outputs = listOf("100"),
+        )
+
+        every { runner.supports("printscript") } returns true
+        every { snippetClient.getAllEnvs(userId) } returns emptyList()
+
+        every {
+            runner.run(any(), any(), any(), any())
+        } returns RunnerResult(
+            success = true,
+            output = listOf("42"),
+            diagnostics = emptyList(),
+            runtimeMs = 10,
+        )
+
+        val result = service.executeTestStateless(userId, request)
+
+        assertEquals(Status.FAILED, result.status)
+        assertTrue(result.errors.isEmpty())
+
+        verify(exactly = 0) { snippetClient.updateTestStatus(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `executeTestStateless should filter blank output lines`() {
+        val userId = UUID.randomUUID()
+
+        val request = TestExecutionRequestDTO(
+            content = "println(1); println(); println(2);",
+            language = "printscript",
+            version = "1.0",
+            inputs = emptyList(),
+            outputs = listOf("1", "2"),
+        )
+
+        every { runner.supports("printscript") } returns true
+        every { snippetClient.getAllEnvs(userId) } returns emptyList()
+
+        every {
+            runner.run(any(), any(), any(), any())
+        } returns RunnerResult(
+            success = true,
+            output = listOf("1", "", "2"),
+            diagnostics = emptyList(),
+            runtimeMs = 12,
+        )
+
+        val result = service.executeTestStateless(userId, request)
+
+        assertEquals(Status.PASSED, result.status)
+        assertTrue(result.errors.isEmpty())
+    }
+
+    @Test
+    fun `executeTestStateless should use environment variables from snippet client`() {
+        val userId = UUID.randomUUID()
+
+        val request = TestExecutionRequestDTO(
+            content = "println(x);",
+            language = "printscript",
+            version = "1.0",
+            inputs = emptyList(),
+            outputs = listOf("100"),
+        )
+
+        every { runner.supports("printscript") } returns true
+
+        every { snippetClient.getAllEnvs(userId) } returns listOf(
+            EnvResponseDTO(UUID.randomUUID(), userId, "x", "100"),
+            EnvResponseDTO(UUID.randomUUID(), userId, "y", "200"),
+        )
+
+        every {
+            runner.run(
+                code = "println(x);",
+                version = "1.0",
+                inputs = emptyList(),
+                envs = mapOf("x" to "100", "y" to "200"),
+            )
+        } returns RunnerResult(
+            success = true,
+            output = listOf("100"),
+            diagnostics = emptyList(),
+            runtimeMs = 8,
+        )
+
+        val result = service.executeTestStateless(userId, request)
+
+        assertEquals(Status.PASSED, result.status)
+
+        verify { snippetClient.getAllEnvs(userId) }
+        verify {
+            runner.run(
+                code = "println(x);",
+                version = "1.0",
+                inputs = emptyList(),
+                envs = mapOf("x" to "100", "y" to "200"),
+            )
+        }
+    }
+
+    @Test
+    fun `executeTestStateless should throw when language unsupported`() {
+        val userId = UUID.randomUUID()
+
+        val request = TestExecutionRequestDTO(
+            content = "print(1);",
+            language = "python",
+            version = "3.0",
+            inputs = emptyList(),
+            outputs = emptyList(),
+        )
+
+        every { runner.supports("python") } returns false
+
+        assertThrows(NotFoundException::class.java) {
+            service.executeTestStateless(userId, request)
+        }
+    }
 }

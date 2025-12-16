@@ -171,4 +171,62 @@ class ExecutionIntegrationTest {
 
         verify(exactly = 0) { snippetClient.updateTestStatus(any(), any(), any(), any()) }
     }
+
+    @Test
+    fun `executeTestStateless should return PASSED when output matches expected`() {
+        val userId = UUID.randomUUID()
+
+        every { snippetClient.getAllEnvs(userId) } returns emptyList()
+
+        val request = """
+            {
+              "content": "println(42);",
+              "language": "printscript",
+              "version": "1.0",
+              "inputs": [],
+              "outputs": ["42"]
+            }
+        """.trimIndent()
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/execute/test")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-User-Id", userId.toString())
+                .content(request),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.status").value(Status.PASSED.name))
+            .andExpect(jsonPath("$.errors").isEmpty)
+
+        verify(exactly = 0) { snippetClient.updateTestStatus(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `executeTestStateless should return ERROR when interpreter reports errors`() {
+        val userId = UUID.randomUUID()
+
+        every { snippetClient.getAllEnvs(userId) } returns emptyList()
+
+        val request = """
+            {
+              "content": "let x: number = 'wrong';",
+              "language": "printscript",
+              "version": "1.0",
+              "inputs": [],
+              "outputs": []
+            }
+        """.trimIndent()
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/execute/test")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-User-Id", userId.toString())
+                .content(request),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.status").value(Status.ERROR.name))
+            .andExpect(jsonPath("$.errors").isArray)
+
+        verify(exactly = 0) { snippetClient.updateTestStatus(any(), any(), any(), any()) }
+    }
 }
